@@ -14,8 +14,14 @@ import {
     TableRow,
 } from "../../Tools/TableComponent"
 
-function MainSellScreen() {
+function Customers() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    
+    const navigate = useNavigate();
+
+    const backToMain = () => {
+        navigate("/main");
+    }
 
     const toggleDrawer = (open) => (event) => {
         if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -31,7 +37,8 @@ function MainSellScreen() {
                         <path d="M 4 15 A 2.0002 2.0002 0 1 0 4 19 L 44 19 A 2.0002 2.0002 0 1 0 44 15 L 4 15 z M 4 29 A 2.0002 2.0002 0 1 0 4 33 L 44 33 A 2.0002 2.0002 0 1 0 44 29 L 4 29 z"></path>
                     </svg>
                 </button>
-                <h2 className='userName'>User Name</h2>
+                <h2 className='userName'>Customers</h2>
+                <button className='backbtn' onClick={backToMain}>Back</button>
             </div>
         </header>
         <main>
@@ -40,28 +47,14 @@ function MainSellScreen() {
                 <div className="ItemsContainer">
                     <div className="Firstrow">
                         <div className="field">
-                            <input placeholder='Supply' type="text" className="input-field" />
-                        </div>
-                        <div className="field">
-                            <input placeholder='Countity' type="number" className="input-field" />
-                        </div>
-                        <div className="field">
-                            <input placeholder='Price' type="number" className="input-field" />
-                        </div>
-                    </div>
-                    <div className="Secondrow">
-                        <div className="field">
-                            <input placeholder='Total' type="text" className="input-field" />
-                        </div>
-                        <div className="field">
-                            <input placeholder='Notes' type="text" className="input-field" />
+                            <input placeholder='Name' type="text" className="input-field" />
                         </div>
                     </div>
                     <div className="Thirdrow">
 
                     </div>
                     <div className="Fourthrow">
-                        <button className="button1">Submit</button>
+                        <button className="button1">Add Customer</button>
                     </div>
                 </div>
                 <footer>
@@ -76,23 +69,13 @@ function MainSellScreen() {
                     <Table className='Table'>
                         <TableHeader className='TableHeader'>
                             <TableRow className="Tablehead">
-                                <TableHead>Supply</TableHead>
-                                <TableHead>Countity</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead>Notes</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Total Debt</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody className="Tablebody">
 
                         </TableBody>
-                        <TableFooter>
-                            <TableRow>
-                                <TableCell>Total Sells:</TableCell>
-                                <TableCell >0</TableCell>
-                            </TableRow>
-                        </TableFooter>
                     </Table>
                 </footer>
             </div>
@@ -183,25 +166,23 @@ header{
     flex-direction: column;
     gap: 10px;
     
-    padding: 2em;
     padding-left: 1em;
     padding-right: 1em;
     padding-bottom: 0.4em;
 
-    margin-top: 1.5em;
+    margin-top: 0.3em;
     margin-left: 0.5em;
     margin-right: 0.5em;
-    margin-bottom: 1em;
 
     background-color: hsla(0, 0%, 9%, 0.788);
     backdrop-filter: blur(5px);
     opacity:1;
     border-radius: 25px;
 
-    width:50vw;
-    height: 60vh;
+    width:35vw;
+    height: 30vh;
 
-    box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
+     box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
 }
 
 .Firstrow{
@@ -274,6 +255,27 @@ header{
     }
 }
 
+.backbtn{
+    padding: 0.5em;
+    padding-left: 1.1em;
+    padding-right: 1.1em;
+    border-radius: 5px;
+
+    margin-right: 2em;
+    border: none;
+    
+    outline: none;
+    
+    transition: .4s ease-in-out;
+    
+    background-color: #252525;
+    color: white;
+
+    &.backbtn:hover{
+        background-color:red;
+    }
+}
+
 
 .field{
     display: flex;
@@ -283,7 +285,7 @@ header{
     
     border-radius: 25px;
     
-    padding: 0.6em;
+    padding: 1em;
     padding-left:2em;
     padding-right:2em;
     
@@ -306,7 +308,7 @@ header{
         width: 100%;
         color: #d3d3d3;
 
-        font-size:16px;
+        font-size:15px;
 
         &.input-field::placeholder{
         text-align: center;
@@ -326,7 +328,7 @@ footer{
     gap: 0.5em;
 
     padding: 0.6em;
-    padding-left:1.5em;
+    padding-left: 1.5em;
     
     width:100vw;
     height:6vh;
@@ -348,6 +350,7 @@ footer{
     width: 100%;
     color: #d3d3d3;
 
+    padding: 0.5em;
     &.input-field::placeholder{
         text-align: center;
     }
@@ -421,15 +424,15 @@ footer{
 
         padding:0.5em;
 
-        width:85vw;
-        height: 50vh;
+        width:60vw;
+        height: 40vh;
     }
 
 
     .Firstrow{
     
     margin-top:1em;
-    padding:1em;
+    padding:0.2em;
     height:6em;
     }
     
@@ -441,7 +444,7 @@ footer{
     
     padding: 0.8em;
     
-    margin-left: 0.4em;
+    margin-left: 0.01em;
     margin-right:0.1em;
     margin-top: 0.01em;    
     }
@@ -449,4 +452,4 @@ footer{
 `;
 
 
-export default MainSellScreen
+export default Customers

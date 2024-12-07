@@ -1,8 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom'
 
 function CustomDrawer({ isOpen, toggleDrawer }) {
-    return (
+  
+  const navigate = useNavigate();
+
+    const goCustomers = () => {
+        navigate("/main/customers");
+    };
+
+    const goSellCustomers = () => {
+      navigate("/main/sell-customers");
+  };
+  
+  
+  return (
         <DrawerWrapper>
             <Overlay isOpen={isOpen} onClick={toggleDrawer(false)} />
             <DrawerContent isOpen={isOpen}>
@@ -11,8 +24,8 @@ function CustomDrawer({ isOpen, toggleDrawer }) {
                         <h2 className='FundValue'>Permanant Fund:</h2>
                         <p className='FundValue'>$ 0 0 0 0 0</p>
                         <div className="PagesContainer">
-                          <button className='btn'>Customers</button>
-                          <button className='btn'>Sell Customer</button>
+                          <button onClick={goCustomers} className='btn'>Customers</button>
+                          <button onClick={goSellCustomers} className='btn'>Sell Customer</button>
                           <button className='btn'>Money Income</button>
                           <button className='btn'>Payments</button>
                           <button className='btn'>Types</button>
