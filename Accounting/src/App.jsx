@@ -6,6 +6,13 @@ import SetAccount from './Screens/Accountsetup/Setaccount'
 import MainSellScreen from './Screens/MainScreen/Mainscreen'
 import Customers from './Screens/MainScreen/Customers'
 import SellCustomer from './Screens/MainScreen/Sellcustomer'
+import MoneyIncome from './Screens/MainScreen/Moneyincome'
+import Payments from './Screens/MainScreen/Payments'
+import Types from './Screens/MainScreen/Types'
+import Supplies from './Screens/MainScreen/Supplies'
+import Reciepts from './Screens/MainScreen/Reciepts'
+import Employee from './Screens/MainScreen/Employee'
+
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 function App() {
 
@@ -21,6 +28,12 @@ function App() {
         <Route path="/main" element={<MainSellScreen/>} />               
         <Route path="/main/customers" element={<Customers/>} />               
         <Route path="/main/sell-customers" element={<SellCustomer/>} />               
+        <Route path="/main/money-income" element={<MoneyIncome/>} />               
+        <Route path="/main/payments" element={<Payments/>} />               
+        <Route path="/main/types" element={<Types/>} />               
+        <Route path="/main/supplies" element={<Supplies/>} />               
+        <Route path="/main/reciepts" element={<Reciepts/>} />               
+        <Route path="/main/employees" element={<Employee/>} />               
       </Routes>
 
     </Router>

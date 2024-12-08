@@ -443,8 +443,44 @@ footer{
 }
 
 @media (min-width: 768px) and (max-width: 1024px){
+    .userName{
+        margin-left:1em;
+        text-align:start;
+    }
+
+    .ItemsContainer{
+        margin-top: 1em;
+        margin-left:0.5em;
+        margin-right:0.5em;
+        margin-bottom:1.5em;
+
+        padding:0.5em;
+
+        width:85vw;
+        height: 50vh;
+    }
+
+
+    .Firstrow{
     
-  }
+    margin-top:1em;
+    padding:1em;
+    height:6em;
+    }
+    
+    .Secondrow{
+        margin-top:-1em;
+    }
+
+.field{
+    
+    padding: 0.8em;
+    
+    margin-left: 0.4em;
+    margin-right:0.1em;
+    margin-top: 0.01em;    
+    }
+}
   
 
 @media (max-width: 768px) {

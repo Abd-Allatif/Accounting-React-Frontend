@@ -180,7 +180,7 @@ header{
     border-radius: 25px;
 
     width:35vw;
-    height: 30vh;
+    height: 35vh;
 
      box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
 }
@@ -406,7 +406,43 @@ footer{
 }
 
 @media (min-width: 768px) and (max-width: 1024px){
+    .userName{
+        margin-left:1em;
+        text-align:start;
+    }
+
+    .ItemsContainer{
+        margin-top: 1em;
+        margin-left:0.5em;
+        margin-right:0.5em;
+        margin-bottom:1.5em;
+
+        padding:0.5em;
+
+        width:60vw;
+        height: 40vh;
+    }
+
+
+    .Firstrow{
     
+    margin-top:1em;
+    padding:0.2em;
+    height:6em;
+    }
+    
+    .Secondrow{
+        margin-top:-1em;
+    }
+
+.field{
+    
+    padding: 0.8em;
+    
+    margin-left: 0.01em;
+    margin-right:0.1em;
+    margin-top: 0.01em;    
+    }
   }
   
 

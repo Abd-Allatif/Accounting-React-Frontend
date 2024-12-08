@@ -14,8 +14,14 @@ import {
     TableRow,
 } from "../../Tools/TableComponent"
 
-function MainSellScreen() {
+function Reciepts() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+    const navigate = useNavigate();
+
+    const backToMain = () => {
+        navigate("/main");
+    }
 
     const toggleDrawer = (open) => (event) => {
         if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -31,7 +37,8 @@ function MainSellScreen() {
                         <path d="M 4 15 A 2.0002 2.0002 0 1 0 4 19 L 44 19 A 2.0002 2.0002 0 1 0 44 15 L 4 15 z M 4 29 A 2.0002 2.0002 0 1 0 4 33 L 44 33 A 2.0002 2.0002 0 1 0 44 29 L 4 29 z"></path>
                     </svg>
                 </button>
-                <h2 className='userName'>User Name</h2>
+                <h2 className='userName'>Reciepts</h2>
+                <button className='backbtn' onClick={backToMain}>Back</button>
             </div>
         </header>
         <main>
@@ -40,25 +47,30 @@ function MainSellScreen() {
                 <div className="ItemsContainer">
                     <div className="Firstrow">
                         <div className="field">
-                            <input placeholder='Supply' type="text" className="input-field" />
+                            <input placeholder='Type' type="text" className="input-field" />
+                        </div>
+                        <div className="field">
+                            <input placeholder='Supply' type="number" className="input-field" />
                         </div>
                         <div className="field">
                             <input placeholder='Countity' type="number" className="input-field" />
                         </div>
-                        <div className="field">
-                            <input placeholder='Price' type="number" className="input-field" />
-                        </div>
                     </div>
                     <div className="Secondrow">
                         <div className="field">
-                            <input placeholder='Total' type="text" className="input-field" />
+                            <input placeholder='Buy Price' type="text" className="input-field" />
                         </div>
                         <div className="field">
-                            <input placeholder='Notes' type="text" className="input-field" />
+                            <input placeholder='Sell Price' type="text" className="input-field" />
+                        </div>
+                        <div className="field">
+                            <input placeholder='Total' type="text" className="input-field" />
                         </div>
                     </div>
                     <div className="Thirdrow">
-
+                        <div className="field">
+                            <input placeholder='Notes' type="text" className="input-field" />
+                        </div>
                     </div>
                     <div className="Fourthrow">
                         <button className="button1">Submit</button>
@@ -76,11 +88,13 @@ function MainSellScreen() {
                     <Table className='Table'>
                         <TableHeader className='TableHeader'>
                             <TableRow className="Tablehead">
+                                <TableHead>Type</TableHead>
                                 <TableHead>Supply</TableHead>
                                 <TableHead>Countity</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Date</TableHead>
+                                <TableHead>Buy Price</TableHead>
+                                <TableHead>Sell Price</TableHead>
                                 <TableHead>Total</TableHead>
+                                <TableHead>Date</TableHead>
                                 <TableHead>Notes</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -235,7 +249,7 @@ header{
     align-items:center;
     justify-content:center;
     
-    margin-top:-3em;
+    margin-top:-1.9em;
 
     padding:1em;
     height:6em;
@@ -247,7 +261,7 @@ header{
     align-items:center;
     justify-content:center;
     
-    margin-top:-3em;
+    margin-top:-1.5em;
 
     padding:1em;
     height:6em;
@@ -274,6 +288,26 @@ header{
     }
 }
 
+.backbtn{
+    padding: 0.5em;
+    padding-left: 1.1em;
+    padding-right: 1.1em;
+    border-radius: 5px;
+
+    margin-right: 2em;
+    border: none;
+    
+    outline: none;
+    
+    transition: .4s ease-in-out;
+    
+    background-color: #252525;
+    color: white;
+
+    &.backbtn:hover{
+        background-color:red;
+    }
+}
 
 .field{
     display: flex;
@@ -315,6 +349,7 @@ header{
 }
 
 footer{
+    width: 100vw;
     margin-top: 2em;
     align-self:flex-end;
 }
@@ -326,8 +361,7 @@ footer{
     gap: 0.5em;
 
     padding: 0.6em;
-    padding-left:1.5em;
-    
+    padding-left:8.5em;
     width:100vw;
     height:6vh;
     
@@ -381,8 +415,9 @@ footer{
     height:auto;
     background:#252525;
     color:white;
-
-    padding-left:1em;
+    
+    padding:0.5em;
+    padding-left: 1em;
     border-collapse: separate;
     border-spacing: 5px;
 }
@@ -392,6 +427,7 @@ footer{
     box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
     font-weight:600;
     font-size:17px;
+
 }
 
 .Tablebody{
@@ -440,7 +476,7 @@ footer{
     margin-right:0.1em;
     margin-top: 0.01em;    
     }
-  }
+}
   
 
 @media (max-width: 768px) {
@@ -485,4 +521,4 @@ footer{
 `;
 
 
-export default MainSellScreen
+export default Reciepts

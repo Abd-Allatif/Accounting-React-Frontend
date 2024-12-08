@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom'
+import Employees from '../Screens/MainScreen/Employee';
 
 function CustomDrawer({ isOpen, toggleDrawer }) {
   
@@ -13,7 +14,30 @@ function CustomDrawer({ isOpen, toggleDrawer }) {
     const goSellCustomers = () => {
       navigate("/main/sell-customers");
   };
-  
+
+    const goMoneyIncome = () => {
+      navigate("/main/money-income");
+    }
+
+    const goPayments = () => {
+      navigate("/main/payments");
+    }
+
+    const goTypes = () => {
+      navigate("/main/types");
+    }
+
+    const goSupplies = () => {
+      navigate("/main/supplies")
+    }
+
+    const goReciepts = () => {
+      navigate("/main/reciepts");
+    }
+
+    const goEmployee = () => {
+      navigate("/main/employees");
+    }  
   
   return (
         <DrawerWrapper>
@@ -26,12 +50,12 @@ function CustomDrawer({ isOpen, toggleDrawer }) {
                         <div className="PagesContainer">
                           <button onClick={goCustomers} className='btn'>Customers</button>
                           <button onClick={goSellCustomers} className='btn'>Sell Customer</button>
-                          <button className='btn'>Money Income</button>
-                          <button className='btn'>Payments</button>
-                          <button className='btn'>Types</button>
-                          <button className='btn'>Supplies</button>
-                          <button className='btn'>Reciepts</button>
-                          <button className='btn'>Employees</button>
+                          <button onClick={goMoneyIncome} className='btn'>Money Income</button>
+                          <button onClick={goPayments} className='btn'>Payments</button>
+                          <button onClick={goTypes} className='btn'>Types</button>
+                          <button onClick={goSupplies} className='btn'>Supplies</button>
+                          <button onClick={goReciepts} className='btn'>Reciepts</button>
+                          <button onClick={goEmployee} className='btn'>Employees</button>
                           <button className='btn'>Inventory</button>
                         </div>
                     </div>
@@ -153,8 +177,8 @@ const DrawerContent = styled.div`
 
     .btn{
       padding: 0.5em;
-      padding-left: 1.1em;
-      padding-right: 12em;
+      padding-left: 1.2em;
+      padding-right: 8em;
 
        margin-right: 0.5em;
   
