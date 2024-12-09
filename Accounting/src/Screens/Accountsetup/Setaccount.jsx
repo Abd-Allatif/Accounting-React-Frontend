@@ -20,6 +20,11 @@ function SetAccount() {
 
   const userData = JSON.parse(localStorage.getItem('user_data'));
 
+  const navigate = useNavigate();
+
+  const goMainScreen = () => {
+    navigate("/main");
+  };
 
   const addToList = (list, setList, value) => {
     if (value) {
@@ -40,6 +45,7 @@ function SetAccount() {
 
       // Send all data to the backend
       await axios.post(`${import.meta.env.VITE_API_URL}/${userData.user_name}/setup/`, {
+        issatup: true,
         budget,
         types: displayTypes,
         customers: displayCustomer,
@@ -68,6 +74,7 @@ function SetAccount() {
       console.log('Access Token:', localStorage.getItem('access_token'));
       // Send all data to the backend
       await refreshAndSubmit();
+      goMainScreen();
     } catch (error) {
       console.error('Error during submission:', error);
       setLoading(false);

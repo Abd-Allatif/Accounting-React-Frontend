@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import Loader from '../../Tools/Loader'
 import { login } from '../../Tools/authService'
@@ -12,6 +12,13 @@ function Login() {
   const [user, setUser] = useState(null);
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userData,setUserData] = useState({});
+
+  useEffect(() => {
+    const user = localStorage.getItem('issatup');
+    setUserData(user);
+    console.log(user)
+  },[])
 
   const navigate = useNavigate();
 
@@ -27,6 +34,10 @@ function Login() {
     navigate("/setup-account")
   }
 
+  function goMainScreen() {
+    navigate("/main");
+  }
+
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -34,8 +45,8 @@ function Login() {
 
   const submitData = async (event) => {
     event.preventDefault();
-    setLoading(true);
 
+    setLoading(true);
     if (password == null) {
       window.alert('Password Must Not be Empty')
       setLoading(false);
@@ -48,25 +59,23 @@ function Login() {
       return;
     }
     else {
-      // await axios.post
-      //   (`${import.meta.env.VITE_API_URL}/login/`,
-      //     { identifier, password }
-      //   ).then(response => {
-      //     window.alert('Login successful', response.data);
-      //     setUser(response.data.user);
-      //     setLoading(false);
-      //     goSetupAccount();
-      //   }).catch(error => {
-      //     setLoading(false);
-      //     window.alert(`Please Check Your User Name and Password`)
-      //   });
       try {
         await login(identifier, password);
         window.alert('Login Successful');
         setLoading(false);
-        goSetupAccount();
+        try {
+          if (userData) {
+            goMainScreen();
+          }
+          else {
+            goSetupAccount();
+          }
+        } catch (error) {
+          window.alert("Couldn't Get Your Data Please Register Or Refresh The Page");
+          console.log(error);
+        }
       }
-      catch (error){
+      catch (error) {
         window.alert('Invalid Credentials');
         setLoading(false);
       }

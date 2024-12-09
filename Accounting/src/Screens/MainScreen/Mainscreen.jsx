@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import Loader from '../../Tools/Loader'
 import Drawer from '../../Tools/Drawer'
+import { logout } from '../../Tools/authService';
+
 import {
     Table,
     TableBody,
@@ -17,12 +19,28 @@ import {
 function MainSellScreen() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
+    const navigate = useNavigate();
+
+    const logoutNav = () => {
+        navigate("/");
+    };
+
     const toggleDrawer = (open) => (event) => {
         if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
             return;
         }
         setIsDrawerOpen(open);
     };
+
+    const logoutBtn = async (event) => {
+        event.preventDefault();
+        const logoutConfirm = window.confirm("Do You Really Want To Logout?");
+        if (logoutConfirm){
+            await logout();
+            logoutNav();
+        }
+    }
+
     return (<StyledWrapper>
         <header>
             <div className="TopBar">
@@ -32,6 +50,7 @@ function MainSellScreen() {
                     </svg>
                 </button>
                 <h2 className='userName'>User Name</h2>
+                <button className='Logout' onClick={logoutBtn}>Logout</button>
             </div>
         </header>
         <main>
@@ -271,6 +290,27 @@ header{
 
     &.button1:hover{
         background-color:black;
+    }
+}
+
+.Logout{
+     padding: 0.5em;
+    padding-left: 1.1em;
+    padding-right: 1.1em;
+    border-radius: 5px;
+
+    margin-right: 2em;
+    border: none;
+    
+    outline: none;
+    
+    transition: .4s ease-in-out;
+    
+    background-color: #252525;
+    color: white;
+
+    &.Logout:hover{
+        background-color:red;
     }
 }
 

@@ -7,6 +7,7 @@ export const login = async (identifier, password) => {
   if (response.data.access) {
     localStorage.setItem('access_token', response.data.access);
     localStorage.setItem('refresh_token', response.data.refresh);
+    localStorage.setItem('issatup',response.data.user.issatup);
     localStorage.setItem('user_data', JSON.stringify(response.data.user));
   }
   
