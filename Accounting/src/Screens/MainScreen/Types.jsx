@@ -1,8 +1,9 @@
 import styled from 'styled-components';
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'
 import Loader from '../../Tools/Loader'
+import { login, refreshAccessToken } from '../../Tools/authService'
 import Drawer from '../../Tools/Drawer'
 import {
     Table,
@@ -16,8 +17,14 @@ import {
 
 function Types() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    
+    const [loading, setLoading] = useState(false);
+    const [typesData, setTypesData] = useState([]);
+    const [types, setType] = useState('');
+    const [typeAdded, setTypeAdded] = useState('');
+
     const navigate = useNavigate();
+
+    const userData = JSON.parse(localStorage.getItem('user_data'));
 
     const backToMain = () => {
         navigate("/main");
@@ -29,6 +36,55 @@ function Types() {
         }
         setIsDrawerOpen(open);
     };
+
+    const fetchTypes = async () => {
+        // Refresh the access token
+        const newAccessToken = await refreshAccessToken();
+
+        await axios.get(`${import.meta.env.VITE_API_URL}/${userData.user_name}/types`, {
+            headers: {
+                'Authorization': `Bearer ${newAccessToken}`,
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            setTypesData(Array.isArray(response.data) ? response.data : [])
+        }).catch(error => {
+            alert("An error happened while fetching types. Please try again.");
+
+        });
+    };
+
+    useEffect(() => {
+        fetchTypes();
+    }, []);
+
+    const send_data = async (event) => {
+        event.preventDefault();
+        setLoading(true);
+
+        // Refresh the access token
+        const newAccessToken = await refreshAccessToken();
+
+        await axios.post(`${import.meta.env.VITE_API_URL}/${userData.user_name}/types`, {
+            user: userData.user_name,
+            types: types,
+        }, {
+            headers: {
+                'Authorization': `Bearer ${newAccessToken}`,
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            setTypeAdded(`${types} Added Successfully`);
+            setTypesData([...typesData, { type: types }]);
+            setLoading(false);
+        }).catch(error => {
+            alert("An Error Happend Please Wait and Try Again");
+            setLoading(false);
+        });
+    };
+
+
+
     return (<StyledWrapper>
         <header>
             <div className="TopBar">
@@ -47,14 +103,17 @@ function Types() {
                 <div className="ItemsContainer">
                     <div className="Firstrow">
                         <div className="field">
-                            <input placeholder='Type' type="text" className="input-field" />
+                            <input placeholder='Type' type="text" value={types} onChange={(e) => { setType(e.target.value) }} className="input-field" />
                         </div>
                     </div>
                     <div className="Thirdrow">
-
+                        {typeAdded && <p style={{ color: 'white' }}>{typeAdded}</p>}
                     </div>
                     <div className="Fourthrow">
-                        <button className="button1">Add Type</button>
+                        <button className="button1" onClick={send_data}>Add Type</button>
+                    </div>
+                    <div style={{ alignSelf: 'center' }}>
+                        {loading && <Loader width='3' height='20' animateHeight='36' />}
                     </div>
                 </div>
                 <footer>
@@ -70,10 +129,19 @@ function Types() {
                         <TableHeader className='TableHeader'>
                             <TableRow className="Tablehead">
                                 <TableHead>Types</TableHead>
+                                <TableHead>
+                                    <div className='TbButtonsContainer'>
+                                            
+                                    </div>
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody className="Tablebody">
-
+                            {typesData.map((type, index) => (
+                                <TableRow key={index}>
+                                    <TableCell style={{fontSize:'20px',padding:'10px'}}>{type.type}</TableCell>
+                                </TableRow>
+                            ))}
                         </TableBody>
                     </Table>
                 </footer>
@@ -307,7 +375,7 @@ header{
         width: 100%;
         color: #d3d3d3;
 
-        font-size:15px;
+        font-size:18px;
 
         &.input-field::placeholder{
         text-align: center;
@@ -315,9 +383,11 @@ header{
   }
 }
 
+
 footer{
     margin-top: 2em;
     align-self:flex-end;
+    width:100vw;
 }
 
 .FilterContainer{
