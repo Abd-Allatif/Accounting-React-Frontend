@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom'
 import Loader from '../../Tools/Loader'
 import Drawer from '../../Tools/Drawer'
@@ -18,8 +18,27 @@ import {
 
 function MainSellScreen() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
+    const [currentDate, SetCurrentDate] = useState('');
+    
     const navigate = useNavigate();
+
+    const formatDate = (date) => { 
+        const day = date.getDate().toString().padStart(2, '0'); 
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); 
+        const year = date.getFullYear(); 
+        return `${year}-${month}-${day}`; 
+    };
+
+    useEffect(() => { 
+        const today = new Date(); 
+        const formattedDate = formatDate(today); 
+        SetCurrentDate(formattedDate); 
+    }, []);
+
+    const handleChange = (e) => { 
+        const { value } = e.target; 
+        SetCurrentDate(value);
+        };
 
     const logoutNav = () => {
         navigate("/");
@@ -35,7 +54,7 @@ function MainSellScreen() {
     const logoutBtn = async (event) => {
         event.preventDefault();
         const logoutConfirm = window.confirm("Do You Really Want To Logout?");
-        if (logoutConfirm){
+        if (logoutConfirm) {
             await logout();
             logoutNav();
         }
@@ -64,13 +83,10 @@ function MainSellScreen() {
                         <div className="field">
                             <input placeholder='Countity' type="number" className="input-field" />
                         </div>
-                        <div className="field">
-                            <input placeholder='Price' type="number" className="input-field" />
-                        </div>
                     </div>
                     <div className="Secondrow">
                         <div className="field">
-                            <input placeholder='Total' type="text" className="input-field" />
+                            <input placeholder='Date' type="date" className="input-field"  value={currentDate || ''} onChange={handleChange} />
                         </div>
                         <div className="field">
                             <input placeholder='Notes' type="text" className="input-field" />
