@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import axios from 'axios';
-import { useState, useEffect } from 'react';
+import { useState, useEffect,useCallback } from 'react';
 import { useNavigate } from 'react-router-dom'
 import Loader from '../../Tools/Loader'
 import { login, refreshAccessToken } from '../../Tools/authService'
@@ -15,12 +15,25 @@ import {
     TableRow,
 } from "../../Tools/TableComponent"
 
+// Debounce function to limit the API calls
+const debounce = (func, delay) => {
+    let debounceTimer;
+    return function (...args) {
+        const context = this;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    };
+};
+
 function Types() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [typesData, setTypesData] = useState([]);
     const [types, setType] = useState('');
     const [typeAdded, setTypeAdded] = useState('');
+    const [editType, setEditType] = useState(null);
+    const [editTypeValue, setEditTypeValue] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     const navigate = useNavigate();
 
@@ -54,6 +67,27 @@ function Types() {
         });
     };
 
+    const searchfetchTypes = async (query = '') => {
+        const newAccessToken = await refreshAccessToken();
+        await axios.get(`${import.meta.env.VITE_API_URL}/${userData.user_name}/${query}`, {
+            headers: {
+                'Authorization': `Bearer ${newAccessToken}`,
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            setTypesData(Array.isArray(response.data) ? response.data : [])
+        }).catch(error => {
+        });
+    };
+
+    const debouncedFetchTypes = useCallback(debounce(searchfetchTypes, 300), []);
+
+    const handleSearchChange = (event) => {
+        const query = event.target.value;
+        setSearchQuery(query);
+        debouncedFetchTypes(query);
+    };
+
     useEffect(() => {
         fetchTypes();
     }, []);
@@ -80,6 +114,45 @@ function Types() {
         }).catch(error => {
             alert("An Error Happend Please Wait and Try Again");
             setLoading(false);
+        });
+    };
+
+
+    const clearbtnClick = () => {
+        fetchTypes();
+    };
+
+    const updateType = async (typeKey) => {
+        const newAccessToken = await refreshAccessToken();
+        await axios.put(`${import.meta.env.VITE_API_URL}/${userData.user_name}/types_edit`, {
+            old_type: typeKey,
+            new_type: editTypeValue
+        }, {
+            headers: {
+                'Authorization': `Bearer ${newAccessToken}`,
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            fetchTypes();
+            setEditType(null);
+            setEditTypeValue('');
+        }).catch(error => {
+            alert("An Error Happened. Please Wait and Try Again.");
+        });
+    };
+
+    const deleteType = async (typeKey) => {
+        const newAccessToken = await refreshAccessToken();
+        await axios.delete(`${import.meta.env.VITE_API_URL}/${userData.user_name}/types_edit`, {
+            data: { type: typeKey },
+            headers: {
+                'Authorization': `Bearer ${newAccessToken}`,
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            fetchTypes();
+        }).catch(error => {
+            alert("An Error Happened. Please Wait and Try Again.");
         });
     };
 
@@ -121,25 +194,44 @@ function Types() {
                         <svg width="35px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M11 6C13.7614 6 16 8.23858 16 11M16.6588 16.6549L21 21M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="#d3d3d3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        <input type="text" className='Search' placeholder='Search for Sell' />
-                        <button className='SearchBtn'>Search</button>
-                        <button className='SearchBtn'>clear</button>
+                        <input type="text" className='Search' placeholder='Search for Sell'  value={searchQuery} onChange={handleSearchChange}/>
+                        <button className='SearchBtn' onClick={clearbtnClick}>Clear</button>
                     </div>
                     <Table className='Table'>
                         <TableHeader className='TableHeader'>
                             <TableRow className="Tablehead">
                                 <TableHead>Types</TableHead>
-                                <TableHead>
-                                    <div className='TbButtonsContainer'>
-                                            
-                                    </div>
-                                </TableHead>
+                                <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody className="Tablebody">
                             {typesData.map((type, index) => (
                                 <TableRow key={index}>
-                                    <TableCell style={{fontSize:'20px',padding:'10px'}}>{type.type}</TableCell>
+                                    <TableCell className='TypesCell' style={{ fontSize: '20px', padding: '10px' }}>
+                                        {editType === type.type ? (
+                                            <div className="Table-field">
+                                                <input
+                                                    className='input-field'
+                                                    type="text"
+                                                    value={editTypeValue}
+                                                    onChange={(e) => setEditTypeValue(e.target.value)}
+                                                />
+                                            </div>
+                                        ) : (
+                                            type.type
+                                        )}
+                                    </TableCell>
+                                    <TableCell className='ButtonsCell'>
+                                        {editType === type.type ? (
+                                            <button className='TableButton' onClick={() => updateType(type.type)}>Save</button>
+                                        ) : (
+                                            <button className='TableButton' onClick={() => {
+                                                setEditType(type.type);
+                                                setEditTypeValue(type.type);
+                                            }}>Edit</button>
+                                        )}
+                                        <button className='TableButton' onClick={() => deleteType(type.type)}>Delete</button>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -152,7 +244,7 @@ function Types() {
 
 const StyledWrapper = styled.div`
 header{
-    margin-bottom:3em;
+    margin-bottom:3.7em;
 }
 
 .Container {
@@ -322,6 +414,32 @@ header{
     }
 }
 
+.TypesCell{
+    width:50%;
+}
+
+.TableButton{
+    padding: 0.5em;
+    padding-left: 3.1em;
+    padding-right: 3.1em;
+    border-radius: 5px;
+
+    margin-right: 0.5em;
+    border: none;
+    
+    outline: none;
+    
+    transition: .4s ease-in-out;
+    
+    background-color: #252525;
+    color: white;
+
+    &.TableButton:hover{
+        background-color:red;
+    }
+}
+
+
 .backbtn{
     padding: 0.5em;
     padding-left: 1.1em;
@@ -353,6 +471,45 @@ header{
     border-radius: 25px;
     
     padding: 1em;
+    padding-left:2em;
+    padding-right:2em;
+    
+    margin-left:1em;
+    margin-right:1em;
+
+    border: none;
+    outline: none;
+    
+    color: white;
+    background-color: #171717;
+    
+    box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
+
+
+    .input-field {
+        background: none;
+        border: none;
+        outline: none;
+        width: 100%;
+        color: #d3d3d3;
+
+        font-size:18px;
+
+        &.input-field::placeholder{
+        text-align: center;
+        }
+  }
+}
+
+.Table-field{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    
+    border-radius: 60px;
+    
+    padding: 0.5em;
     padding-left:2em;
     padding-right:2em;
     
@@ -426,9 +583,9 @@ footer{
     }
 
     .SearchBtn{
-        padding: 0.1em;
-        padding-left: 0.4em;
-        padding-right: 0.4em;
+        padding: 0.2em;
+        padding-left: 0.8em;
+        padding-right: 0.8em;
         border-radius: 15px;
 
         margin-right: 0.5em;
@@ -522,7 +679,7 @@ footer{
     }
 
     .ItemsContainer{
-        margin-top: 1em;
+        margin-top: 2.5em;
         margin-left:0.5em;
         margin-right:0.5em;
         margin-bottom:1.5em;
@@ -530,7 +687,7 @@ footer{
         padding:0.5em;
 
         width:60vw;
-        height: 40vh;
+        height: 50vh;
     }
 
 
