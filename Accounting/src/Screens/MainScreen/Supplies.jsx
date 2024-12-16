@@ -38,6 +38,7 @@ function Supplies() {
     const [buyPrice, setBuyPrice] = useState('');
     const [sellPrice, setSellPrice] = useState('');
     const [dropdownVisible, setDropdownVisible] = useState(false);
+    const [search,setSearch] = useState('');
 
     const units = ['Kgram', 'gram', 'Peace']
 
@@ -120,13 +121,14 @@ function Supplies() {
         // Refresh the access token
         const newAccessToken = await refreshAccessToken();
 
-        await axios.get(`${import.meta.env.VITE_API_URL}/${userData.user_name}/supplies`, {
+        await axios.get(`${import.meta.env.VITE_API_URL}/${userData.user_name}/supplies/`, {
             headers: {
                 'Authorization': `Bearer ${newAccessToken}`,
                 'Content-Type': 'application/json'
             }
         }).then(response => {
             setSuppliesData(Array.isArray(response.data) ? response.data : [])
+            console.log(response.data);
         }).catch(error => {
             alert("An error happened while fetching types. Please try again.");
         });
@@ -136,13 +138,17 @@ function Supplies() {
         fetchSupplies()
     }, []);
 
+    const clearButton = () => {
+        fetchSupplies();
+    }
+
     const send_data = async (event) => {
         event.preventDefault();
     
         // Refresh the access token
         const newAccessToken = await refreshAccessToken();
     
-        await axios.post(`${import.meta.env.VITE_API_URL}/${userData.user_name}/supplies`, {
+        await axios.post(`${import.meta.env.VITE_API_URL}/${userData.user_name}/supplies/`, {
             user: userData.user_name,
             types: searchQuery,
             supplies: supplies,
@@ -153,7 +159,7 @@ function Supplies() {
         }, {
             headers: {
                 'Authorization': `Bearer ${newAccessToken}`,
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             }
         }).then(response => {
             setSuppliesAdded(`${supplies} Added Successfully`);
@@ -252,7 +258,7 @@ function Supplies() {
                         </div>
                     </div>
                     <div className="Thirdrow">
-                        <p>{suppliesAdded}</p>
+                        <p style={{color:'white'}}>{suppliesAdded}</p>
                     </div>
                     <div className="Fourthrow">
                         <button className="button1" onClick={send_data}>Add Supply</button>
@@ -265,14 +271,14 @@ function Supplies() {
                             <path d="M11 6C13.7614 6 16 8.23858 16 11M16.6588 16.6549L21 21M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="#d3d3d3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                         <input type="text" className='Search' placeholder='Search for Sell' />
-                        <button className='SearchBtn'>Search</button>
-                        <button className='SearchBtn'>clear</button>
+                        <button className='SearchBtn' onClick={clearButton}>clear</button>
                     </div>
                     <Table className='Table'>
                         <TableHeader className='TableHeader'>
                             <TableRow className="Tablehead">
                                 <TableHead>Type</TableHead>
                                 <TableHead>Supply</TableHead>
+                                <TableHead>Unit</TableHead>
                                 <TableHead>Countity</TableHead>
                                 <TableHead>Buy Price</TableHead>
                                 <TableHead>Sell Price</TableHead>
@@ -281,11 +287,12 @@ function Supplies() {
                         <TableBody className="Tablebody">
                             {suppliesData.map((supply, index) => (
                                 <TableRow key={index}>
-                                    <TableCell>{supply.type}</TableCell>
-                                    <TableCell>{supply.supplies}</TableCell>
-                                    <TableCell>{supply.countity}</TableCell>
-                                    <TableCell>{supply.buy_price}</TableCell>
-                                    <TableCell>{supply.sell_price}</TableCell>
+                                    <TableCell className='SuppliesCell'>{supply.type}</TableCell>
+                                    <TableCell className='SuppliesCell'>{supply.supply_name}</TableCell>
+                                    <TableCell className='SuppliesCell'>{supply.unit}</TableCell>
+                                    <TableCell className='SuppliesCell'>{supply.countity}</TableCell>
+                                    <TableCell className='SuppliesCell'>{supply.buy_price}</TableCell>
+                                    <TableCell className='SuppliesCell'>{supply.sell_price}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -649,7 +656,7 @@ footer{
     gap: 0.5em;
 
     padding: 0.6em;
-    padding-left:8.5em;
+    padding-left:1.4em;
     width:100vw;
     height:6vh;
     
@@ -676,9 +683,9 @@ footer{
     }
 
     .SearchBtn{
-        padding: 0.1em;
-        padding-left: 0.4em;
-        padding-right: 0.4em;
+        padding: 0.2em;
+        padding-left: 0.8em;
+        padding-right: 0.8em;
         border-radius: 15px;
 
         margin-right: 0.5em;
@@ -721,6 +728,11 @@ footer{
 .Tablebody{
     overflow-y:auto;
 }
+
+.SuppliesCell{
+    font-size:17px;
+}
+
 
 .TableCell{
     
