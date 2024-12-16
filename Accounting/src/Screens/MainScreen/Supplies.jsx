@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'
+import { login, refreshAccessToken } from '../../Tools/authService'
 import Loader from '../../Tools/Loader'
 import Drawer from '../../Tools/Drawer'
 import {
@@ -14,10 +15,37 @@ import {
     TableRow,
 } from "../../Tools/TableComponent"
 
+// Debounce function to limit the API calls
+const debounce = (func, delay) => {
+    let debounceTimer;
+    return function (...args) {
+        const context = this;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    };
+};
+
 function Supplies() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [typesData, setTypesData] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [focusedIndex, setFocusedIndex] = useState(-1);
+    const [suppliesData, setSuppliesData] = useState([]);
+    const [supplies, setsupplies] = useState('');
+    const [suppliesAdded, setSuppliesAdded] = useState('');
+    const [unit, setUnit] = useState('Unit');
+    const [countity, setCountity] = useState('');
+    const [buyPrice, setBuyPrice] = useState('');
+    const [sellPrice, setSellPrice] = useState('');
+    const [dropdownVisible, setDropdownVisible] = useState(false);
+
+    const units = ['Kgram', 'gram', 'Peace']
+
+    const userData = JSON.parse(localStorage.getItem('user_data'));
 
     const navigate = useNavigate();
+
+    const dropdownRef = useRef(null);
 
     const backToMain = () => {
         navigate("/main");
@@ -29,6 +57,147 @@ function Supplies() {
         }
         setIsDrawerOpen(open);
     };
+
+    const handleDropdownToggle = () => {
+        setDropdownVisible(!dropdownVisible);
+    };
+
+    const searchfetchTypes = async (query = '') => {
+        const newAccessToken = await refreshAccessToken();
+        await axios.get(`${import.meta.env.VITE_API_URL}/${userData.user_name}/${query}`, {
+            headers: {
+                'Authorization': `Bearer ${newAccessToken}`,
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            setTypesData(Array.isArray(response.data) ? response.data : [])
+        }).catch(error => {
+        });
+    };
+
+    const debouncedFetchTypes = useCallback(debounce(searchfetchTypes, 300), []);
+
+    const handleSearchChange = (event) => {
+        const query = event.target.value;
+        setSearchQuery(query);
+        debouncedFetchTypes(query);
+        if (query == "" || query == null) {
+            setTypesData([]);
+        }
+    };
+
+    const handleTypeSelect = (type) => {
+        setSearchQuery(type);
+        setTypesData([]);
+    };
+
+    const handleUnitSelect = (unit) => {
+        setUnit(unit);
+    };
+
+    const handleKeyDown = (event) => {
+        if (typesData.length > 0) {
+            if (event.key === 'ArrowDown') {
+                setFocusedIndex((prevIndex) => {
+                    const nextIndex = (prevIndex + 1) % typesData.length;
+                    scrollToItem(nextIndex);
+                    return nextIndex;
+                });
+            } else if (event.key === 'ArrowUp') {
+                setFocusedIndex((prevIndex) => {
+                    const nextIndex = (prevIndex - 1 + typesData.length) % typesData.length;
+                    scrollToItem(nextIndex);
+                    return nextIndex;
+                });
+            } else if (event.key === 'Enter' && focusedIndex >= 0) {
+                handleTypeSelect(typesData[focusedIndex].type);
+            }
+        }
+    };
+
+
+    const fetchSupplies = async () => {
+        // Refresh the access token
+        const newAccessToken = await refreshAccessToken();
+
+        await axios.get(`${import.meta.env.VITE_API_URL}/${userData.user_name}/supplies`, {
+            headers: {
+                'Authorization': `Bearer ${newAccessToken}`,
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            setSuppliesData(Array.isArray(response.data) ? response.data : [])
+        }).catch(error => {
+            alert("An error happened while fetching types. Please try again.");
+        });
+    };
+
+    useEffect(() => {
+        fetchSupplies()
+    }, []);
+
+    const send_data = async (event) => {
+        event.preventDefault();
+    
+        // Refresh the access token
+        const newAccessToken = await refreshAccessToken();
+    
+        await axios.post(`${import.meta.env.VITE_API_URL}/${userData.user_name}/supplies`, {
+            user: userData.user_name,
+            types: searchQuery,
+            supplies: supplies,
+            unit: unit,
+            countity: countity,
+            buy_price: buyPrice,
+            sell_price: sellPrice,
+        }, {
+            headers: {
+                'Authorization': `Bearer ${newAccessToken}`,
+                'Content-Type': 'application/json',
+            }
+        }).then(response => {
+            setSuppliesAdded(`${supplies} Added Successfully`);
+            setSuppliesData([...suppliesData, {
+                type: searchQuery,
+                supplies: supplies,
+                unit: unit,
+                countity: countity,
+                buy_price: buyPrice,
+                sell_price: sellPrice
+            }])
+            setSearchQuery('');
+            setsupplies('');
+            setUnit('');
+            setCountity('');
+            setBuyPrice('');
+            setSellPrice('');
+        }).catch(error => {
+            console.error("An Error Happend Please Wait and Try Again", error);
+        });
+    };
+    
+
+    const scrollToItem = (index) => {
+        const dropdown = dropdownRef.current;
+        const item = dropdown?.children[index];
+        if (item) {
+            const itemHeight = item.offsetHeight;
+            const visibleStart = dropdown.scrollTop;
+            const visibleEnd = visibleStart + dropdown.clientHeight;
+
+            const itemStart = item.offsetTop;
+            const itemEnd = itemStart + itemHeight;
+
+            if (itemStart < visibleStart) {
+                dropdown.scrollTop = itemStart;
+            } else if (itemEnd > visibleEnd) {
+                dropdown.scrollTop = itemEnd - dropdown.clientHeight;
+            }
+        }
+    };
+
+
+
     return (<StyledWrapper>
         <header>
             <div className="TopBar">
@@ -46,28 +215,48 @@ function Supplies() {
                 <Drawer isOpen={isDrawerOpen} toggleDrawer={toggleDrawer} />
                 <div className="ItemsContainer">
                     <div className="Firstrow">
-                        <div className="field">
-                            <input placeholder='Type' type="text" className="input-field" />
+                        <div className="type-field">
+                            <input
+                                placeholder='Type'
+                                type="text"
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                onKeyDown={handleKeyDown}
+                                className="input-field"
+                            />
+                            {typesData.length > 0 && (
+                                <div className="dropdown" ref={dropdownRef}>
+                                    {typesData.map((type, index) => (
+                                        <div key={index} className={`dropdown-item${index === focusedIndex ? '-focused' : ''}`} onClick={() => handleTypeSelect(type.type)}>
+                                            {type.type}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                         <div className="field">
-                            <input placeholder='Supply' type="number" className="input-field" />
-                        </div>
-                        <div className="field">
-                            <input placeholder='Countity' type="number" className="input-field" />
+                            <input placeholder='Supply' type="text" className="input-field" value={supplies} onChange={(e) => setsupplies(e.target.value)} />
                         </div>
                     </div>
                     <div className="Secondrow">
-                        <div className="field">
-                            <input placeholder='Buy Price' type="text" className="input-field" />
+                        <div className="type-field">
+                            <button className='dropdownButton' onClick={handleDropdownToggle}>{unit}</button>
+                            {dropdownVisible && (<div className="dropdown"> {units.map((unit, index) => (<div key={index} className={`dropdown-item`} onClick={() => handleUnitSelect(unit)}> {unit} </div>))} </div>)}
+                            <input placeholder='Countity' type="number" className="countity-input-field" value={countity} onChange={(e) => setCountity(e.target.value)} />
                         </div>
                         <div className="field">
-                            <input placeholder='Sell Price' type="text" className="input-field" />
+                            <input placeholder='Buy Price' type="text" className="input-field" value={buyPrice} onChange={(e) => setBuyPrice(e.target.value)} />
+                        </div>
+                        <div className="field">
+                            <input placeholder='Sell Price' type="text" className="input-field" value={sellPrice} onChange={(e) => setSellPrice(e.target.value)} />
                         </div>
                     </div>
                     <div className="Thirdrow">
+                        <p>{suppliesAdded}</p>
                     </div>
                     <div className="Fourthrow">
-                        <button className="button1">Submit</button>
+                        <button className="button1" onClick={send_data}>Add Supply</button>
+
                     </div>
                 </div>
                 <footer>
@@ -90,14 +279,16 @@ function Supplies() {
                             </TableRow>
                         </TableHeader>
                         <TableBody className="Tablebody">
-
+                            {suppliesData.map((supply, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{supply.type}</TableCell>
+                                    <TableCell>{supply.supplies}</TableCell>
+                                    <TableCell>{supply.countity}</TableCell>
+                                    <TableCell>{supply.buy_price}</TableCell>
+                                    <TableCell>{supply.sell_price}</TableCell>
+                                </TableRow>
+                            ))}
                         </TableBody>
-                        <TableFooter>
-                            <TableRow>
-                                <TableCell>Total Sells:</TableCell>
-                                <TableCell >0</TableCell>
-                            </TableRow>
-                        </TableFooter>
                     </Table>
                 </footer>
             </div>
@@ -158,6 +349,55 @@ header{
         transform: scale(1.02);
         border: 1px solid black;
     }
+}
+
+.dropdownButton{
+    position: relative;
+    padding: 0.1em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    border-radius: 10px;
+
+    margin-right: 0.5em;
+    border: none;
+    
+    outline: none;
+    
+    transition: .4s ease-in-out;
+    
+    background-color: #252525;
+    color: white;
+
+    &.dropdownButton:hover{
+        background-color:black;
+    }
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #252525;
+    color: white;
+    border: 1px solid #171717;
+    border-radius: 15px;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.dropdown-item {
+    padding: 8px;
+    cursor: pointer;
+}
+
+dropdown-item-focused {
+    background: #444;
+}
+
+.dropdown-item:hover {
+    background: #444;
 }
 
 .userName{
@@ -337,6 +577,63 @@ header{
         text-align: center;
         }
   }
+}
+
+.countity-input-field{
+        background: none;
+        padding-right:20px;
+        border: none;
+        outline: none;
+        width: 100%;
+        color: #d3d3d3;
+
+        font-size:16px;
+
+        &.input-field::placeholder{
+        text-align: center;
+        }
+}
+
+
+.type-field{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    border-radius: 25px;
+    
+    padding: 0.6em;
+    padding-left:0.5em;
+    padding-right:0.1em;
+    
+    margin-left:0.5em;
+    margin-right:0.1em;
+
+    border: none;
+    outline: none;
+    
+    color: white;
+    background-color: #171717;
+    
+    box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
+
+
+    .input-field {
+        background: none;
+        border: none;
+        outline: none;
+        width: 100%;
+        color: #d3d3d3;
+
+        font-size:16px;
+
+        &.input-field::placeholder{
+        text-align: center;
+        }
+  }
+
+
 }
 
 footer{
